@@ -3,5 +3,6 @@
 	<virtual>
 		<port>8080</port>
 		<path>public_html</path>
+		<directoryIndex>index.html</directoryIndex>
 	</virtual>
 </server>

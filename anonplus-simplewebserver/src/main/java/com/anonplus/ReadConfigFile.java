@@ -13,7 +13,7 @@ public class ReadConfigFile {
 	public Integer port = null;
 	public String config_filename = null;
 	public String path = null;
-	
+	public String directoryIndex = null;
 	
 	
 	public ReadConfigFile(String filename) 
@@ -29,7 +29,7 @@ public class ReadConfigFile {
 		    System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
 		    NodeList nodeList = doc.getElementsByTagName("virtual");		    
 		    
-		    System.out.println("-----------------------");
+		    //System.out.println("-----------------------");
 		 
 		    for (int i = 0; i < 1 /* nodeList.getLength() */; ++i) {
 		 
@@ -39,6 +39,7 @@ public class ReadConfigFile {
 		          Element ele = (Element) node;
 		          port = Integer.parseInt( getTagValue("port" , ele) );
 		          path = new File(getTagValue("path" , ele)).getAbsolutePath();
+		          directoryIndex =  getTagValue("directoryIndex" , ele);
 		          
 //		 
 //		          System.out.println("Port : "  + Integer.toString(port));

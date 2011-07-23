@@ -24,9 +24,6 @@ public class Server
 		private void startServer()  {
 			message("Starting server...");	
 			ServerSocket socket = null;
-			
-			message("The simple httpserver v. 0000000000\nCoded by Jon Berg" +
-		      "<jon.berg[on server]turtlemeat.com>\n\n");
 			try {
 			   
 			      socket = new ServerSocket(port);			      
