@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<server>
+	<virtual>
+		<port>8080</port>
+		<path>public_html</path>
+	</virtual>
+</server>
