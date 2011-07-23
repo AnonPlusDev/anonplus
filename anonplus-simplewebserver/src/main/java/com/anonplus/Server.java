@@ -6,8 +6,6 @@ import java.net.*;
 import java.io.*;
 
 
-//import java.text.*;
-
 public class Server 
 	extends Thread {
 		
@@ -30,9 +28,7 @@ public class Server
 			message("The simple httpserver v. 0000000000\nCoded by Jon Berg" +
 		      "<jon.berg[on server]turtlemeat.com>\n\n");
 			try {
-			     
-			      //s("Trying to bind to localhost on port " + Integer.toString(port) + "...");
-			      //make a ServerSocket and bind it to given port,
+			   
 			      socket = new ServerSocket(port);			      
 			}   catch (Exception e) {
 				message("Binding to port " + Integer.toString(port) + ": Failed!\n");
@@ -48,14 +44,11 @@ public class Server
 			        InetAddress client = connSocket.getInetAddress();
 
 			        message(client.getHostName() + " connected to server.\n");
-			        //Read the http request from the client from the socket interface
-			        //into a buffer.
+
 			        BufferedReader input =
 			            new BufferedReader(new InputStreamReader(connSocket.
 			            getInputStream()));
-			        //Prepare a outputstream from us to the client,
-			        //this will be used sending back our response
-			        //(header + requested file) to the client.
+
 			        DataOutputStream output =
 			            new DataOutputStream(connSocket.getOutputStream());
 			        message("Got request!\n");
