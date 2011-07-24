@@ -8,34 +8,32 @@ import java.util.*;
  */
 
 
-public class App  { 
-	static private void message(String m)
-	{
-		System.out.println (m);
-	}	
+public class App  {
+	static private Server server = null;
+	
 	
 	public static void main(String[] args) {
 
-
+		
 		System.out.println ("Trying to ignite");
-		ReadConfigFile cFile = new ReadConfigFile("config.xml");
-		message("Configs:\n");
-		message("directoryIndex: " + cFile.directoryIndex +"\n") ;
-		message("port: " + cFile.port +"\n") ;
-		message("path: " + cFile.path +"\n") ;
+		Config config = new Config();
+		try {
+			config.readConfigurationFile("anonplus-simplewebserver.conf");
+			Global.message("--------------------------------------------------");
+			Global.message("Server config: ");
+			Global.message("DirectoryIndex: " + config.DirectoryIndex ) ;
+			Global.message("Port: " + config.Port) ;
+			Global.message("DocumentRoot: " + config.DocumentRoot);
+			server = new Server(config);
+			
+		} catch (Exception e2) {
+			Global.message("error:" + e2.getMessage());
+		};
 		
 		
-		Integer port;
-		
-		
-	    try {
-	      port = new Integer(args[0]);
-	      //catch parse error
-	    }
-	    catch (Exception e) {
-	      port = new Integer(80);
-	    }
-	    Server s = new Server(port);
+
+
+	    
 	    
 	}
 	
