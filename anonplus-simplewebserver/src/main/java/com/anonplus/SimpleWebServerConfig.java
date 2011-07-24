@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 
 
-public class Config {
+public class SimpleWebServerConfig {
 	
 	public Integer Port = null;
 	public String config_filename = null;

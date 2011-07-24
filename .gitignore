@@ -2,5 +2,6 @@
 .project
 anon*/.settings
 anon*/.project
+anon*/bin
 anon*/target
 .classpath
