@@ -32,7 +32,6 @@ public class AnonPlusSimpleWebServer  {
 	
 	public static void main(String[] args) {
 
-
 		AnonPlusSimpleWebServer program = new AnonPlusSimpleWebServer();
 		program.loadArgs(args);		
 		SimpleWebServerConfig config = new SimpleWebServerConfig();
@@ -49,6 +48,7 @@ public class AnonPlusSimpleWebServer  {
 			
 		} catch (Exception e2) {
 			Global.message("error:" + e2.getMessage());
+			e2.printStackTrace();
 		};
 	    
 	}

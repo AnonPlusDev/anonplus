@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -14,30 +16,27 @@ import java.util.regex.Pattern;
 
 public class SimpleWebServerConfig {
 	
-	private Integer port = null;
-	private String config_filename = null;
-	private String documentRoot = null;
-	private List<String> DirectoryIndex = null;
-	private String error400page = null;
-	private String error403page = null;
-	private String error404page = null;
-	private String error500page = null;
-	private String error501page = null;
-	private String mimeFile = null;
-	private MimeTypeList mimeTypes = null;
+	private Integer port;
+	private String config_filename;
+	private String documentRoot;
+	private List<String> DirectoryIndex;
+	private String error400page;
+	private String error403page;
+	private String error404page;
+	private String error500page;
+	private String error501page;
+	private String mimeFile;
+	private MimeTypeList mimeTypes;
 	
 	public void readConfigurationFile(String filename) throws IOException {
-		File file= new File(filename);
-		filename = file.getAbsolutePath();
-		if(!file.exists() ||  !file.canRead() || file.isDirectory())
-		{
-			throw new IOException("Path: " + filename + " does not exist, is a directory or it's not readble!\n");
+		InputStream configFileStream = SimpleWebServerConfig.class.getResourceAsStream("/resources/" + filename);
+		if(configFileStream == null) {
+			throw new IOException("Path: " + filename + " does not exist, is a directory or it's not readable!\n");
 		}
 		Global.message("Reading " + filename + " !\n");
 		 
 		Properties p = new Properties();
-		FileReader fr= new FileReader(filename);
-		p.load(fr);
+		p.load(configFileStream);
 		
 		port = Integer.parseInt(p.getProperty("Port", "8080"));
 		documentRoot = p.getProperty("DocumentRoot", "./public_html");
@@ -51,27 +50,25 @@ public class SimpleWebServerConfig {
 			
 		}
 		mimeFile = p.getProperty("MimeFile", "mime.types");
-		mimeFile = new File(mimeFile).getAbsolutePath();	
+		//mimeFile = new File(mimeFile).getAbsolutePath();	
 		Global.message(" ++++++++ " + mimeFile );
 		
 		documentRoot = p.getProperty("DocumentRoot", "public_html");
-		if(Global.DEBUG) p.list(System.out);
-		fr.close();
-		
-		this.readMimeFile();
+		if(Global.DEBUG) p.list(System.out);		
+		readMimeFile();
 		
 	}
 	
 	private void readMimeFile() throws IOException {
 	
-		File file= new File(mimeFile);		
-		if(!file.exists() ||  !file.canRead() || file.isDirectory())
+		InputStream configFileStream = SimpleWebServerConfig.class.getResourceAsStream("/resources/" + mimeFile);
+		if(configFileStream == null)
 		{
 			throw new IOException("Path: " + mimeFile + " does not exist, is a directory or it's not readble!\n");
 		} 
 		
-		FileReader fr = new FileReader(mimeFile);
-		BufferedReader br = new BufferedReader(fr);
+		InputStreamReader reader = new InputStreamReader(configFileStream);
+		BufferedReader br = new BufferedReader(reader);
 		String bufferLine;
 		Pattern p = Pattern.compile("#.*$");
 		Global.message("-------------------------------------");
