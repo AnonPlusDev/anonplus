@@ -14,17 +14,17 @@ import java.util.regex.Pattern;
 
 public class SimpleWebServerConfig {
 	
-	public Integer Port = null;
-	public String config_filename = null;
-	public String DocumentRoot = null;
-	public List<String> DirectoryIndex = null;
-	public String Error400page = null;
-	public String Error403page = null;
-	public String Error404page = null;
-	public String Error500page = null;
-	public String Error501page = null;
-	public String MimeFile = null;
-	MimeTypeList MimeTypes = null;
+	private Integer port = null;
+	private String config_filename = null;
+	private String documentRoot = null;
+	private List<String> DirectoryIndex = null;
+	private String error400page = null;
+	private String error403page = null;
+	private String error404page = null;
+	private String error500page = null;
+	private String error501page = null;
+	private String mimeFile = null;
+	private MimeTypeList mimeTypes = null;
 	
 	public void readConfigurationFile(String filename) throws IOException {
 		File file= new File(filename);
@@ -39,10 +39,10 @@ public class SimpleWebServerConfig {
 		FileReader fr= new FileReader(filename);
 		p.load(fr);
 		
-		this.Port = Integer.parseInt(p.getProperty("Port", "8080"));
-		this.DocumentRoot = p.getProperty("DocumentRoot", "./public_html");
-		this.DocumentRoot = new File(this.DocumentRoot).getAbsolutePath();		
-		Global.message(" ++++++++ " + this.DocumentRoot );
+		port = Integer.parseInt(p.getProperty("Port", "8080"));
+		documentRoot = p.getProperty("DocumentRoot", "./public_html");
+		documentRoot = new File(documentRoot).getAbsolutePath();		
+		Global.message(" ++++++++ " + documentRoot );
 		String tmpList[] = p.getProperty("DirectoryIndex", "index.html default.html").split(" ");
 		this.DirectoryIndex = new ArrayList<String>();
 		for(int i=0; i < tmpList.length; ++i) {
@@ -50,11 +50,11 @@ public class SimpleWebServerConfig {
 			if(Global.DEBUG) Global.message("Adding to DirectoryIndex: " + tmpList[i] );		
 			
 		}
-		this.MimeFile = p.getProperty("MimeFile", "mime.types");
-		this.MimeFile = new File(this.MimeFile).getAbsolutePath();	
-		Global.message(" ++++++++ " + this.MimeFile );
+		mimeFile = p.getProperty("MimeFile", "mime.types");
+		mimeFile = new File(mimeFile).getAbsolutePath();	
+		Global.message(" ++++++++ " + mimeFile );
 		
-		this.DocumentRoot = p.getProperty("DocumentRoot", "public_html");
+		documentRoot = p.getProperty("DocumentRoot", "public_html");
 		if(Global.DEBUG) p.list(System.out);
 		fr.close();
 		
@@ -64,13 +64,13 @@ public class SimpleWebServerConfig {
 	
 	private void readMimeFile() throws IOException {
 	
-		File file= new File(this.MimeFile);		
+		File file= new File(mimeFile);		
 		if(!file.exists() ||  !file.canRead() || file.isDirectory())
 		{
-			throw new IOException("Path: " + this.MimeFile + " does not exist, is a directory or it's not readble!\n");
+			throw new IOException("Path: " + mimeFile + " does not exist, is a directory or it's not readble!\n");
 		} 
 		
-		FileReader fr = new FileReader(this.MimeFile);
+		FileReader fr = new FileReader(mimeFile);
 		BufferedReader br = new BufferedReader(fr);
 		String bufferLine;
 		Pattern p = Pattern.compile("#.*$");
@@ -79,7 +79,7 @@ public class SimpleWebServerConfig {
 		Global.message("-------------------------------------");
 		Global.message("           REGEX                     ");
 		
-		MimeTypes = new MimeTypeList(); 
+		mimeTypes = new MimeTypeList(); 
 		do 
 		{
 			bufferLine = br.readLine();
@@ -96,20 +96,168 @@ public class SimpleWebServerConfig {
 			for(int i = 0; i < sList.length; ++i)
 			{
 				if(i < 1)
-					mimeType.contentType = sList[i];
+					mimeType.setContentType(sList[i]);
 				else
-					mimeType.extensions.add(sList[i]);				
+					mimeType.getExtensions().add(sList[i]);				
 			}
-			MimeTypes.list.add(mimeType);
-			Global.message("Adding Mime: contentType ->  " + mimeType.contentType );
-			Global.message("Adding Mime: extensions ->  " + mimeType.extensions.toString() );
+			mimeTypes.list.add(mimeType);
+			Global.message("Adding Mime: contentType ->  " + mimeType.getContentType());
+			Global.message("Adding Mime: extensions ->  " + mimeType.getExtensions().toString() );
 				
-		} while(bufferLine != null);
-		
-		
-		
-		
+		} while(bufferLine != null);		
+	}
+	
+	/**
+	 * @return the port
+	 */
+	public Integer getPort() {
+		return port;
+	}
 
-		
+	/**
+	 * @param port the port to set
+	 */
+	public void setPort(Integer port) {
+		this.port = port;
+	}
+
+	/**
+	 * @return the config_filename
+	 */
+	public String getConfig_filename() {
+		return config_filename;
+	}
+
+	/**
+	 * @param config_filename the config_filename to set
+	 */
+	public void setConfig_filename(String config_filename) {
+		this.config_filename = config_filename;
+	}
+
+	/**
+	 * @return the documentRoot
+	 */
+	public String getDocumentRoot() {
+		return documentRoot;
+	}
+
+	/**
+	 * @param documentRoot the documentRoot to set
+	 */
+	public void setDocumentRoot(String documentRoot) {
+		this.documentRoot = documentRoot;
+	}
+
+	/**
+	 * @return the directoryIndex
+	 */
+	public List<String> getDirectoryIndex() {
+		return DirectoryIndex;
+	}
+
+	/**
+	 * @param directoryIndex the directoryIndex to set
+	 */
+	public void setDirectoryIndex(List<String> directoryIndex) {
+		DirectoryIndex = directoryIndex;
+	}
+
+	/**
+	 * @return the error400page
+	 */
+	public String getError400page() {
+		return error400page;
+	}
+
+	/**
+	 * @param error400page the error400page to set
+	 */
+	public void setError400page(String error400page) {
+		this.error400page = error400page;
+	}
+
+	/**
+	 * @return the error403page
+	 */
+	public String getError403page() {
+		return error403page;
+	}
+
+	/**
+	 * @param error403page the error403page to set
+	 */
+	public void setError403page(String error403page) {
+		this.error403page = error403page;
+	}
+
+	/**
+	 * @return the error404page
+	 */
+	public String getError404page() {
+		return error404page;
+	}
+
+	/**
+	 * @param error404page the error404page to set
+	 */
+	public void setError404page(String error404page) {
+		this.error404page = error404page;
+	}
+
+	/**
+	 * @return the error500page
+	 */
+	public String getError500page() {
+		return error500page;
+	}
+
+	/**
+	 * @param error500page the error500page to set
+	 */
+	public void setError500page(String error500page) {
+		this.error500page = error500page;
+	}
+
+	/**
+	 * @return the error501page
+	 */
+	public String getError501page() {
+		return error501page;
+	}
+
+	/**
+	 * @param error501page the error501page to set
+	 */
+	public void setError501page(String error501page) {
+		this.error501page = error501page;
+	}
+
+	/**
+	 * @return the mimeFile
+	 */
+	public String getMimeFile() {
+		return mimeFile;
+	}
+
+	/**
+	 * @param mimeFile the mimeFile to set
+	 */
+	public void setMimeFile(String mimeFile) {
+		this.mimeFile = mimeFile;
+	}
+
+	/**
+	 * @return the mimeTypes
+	 */
+	public MimeTypeList getMimeTypes() {
+		return mimeTypes;
+	}
+
+	/**
+	 * @param mimeTypes the mimeTypes to set
+	 */
+	public void setMimeTypes(MimeTypeList mimeTypes) {
+		this.mimeTypes = mimeTypes;
 	}
 }

@@ -13,8 +13,8 @@ public class MimeTypeList {
 		for(int i = 0; i < list.size(); ++i)
 		{
 			MimeType mt = list.get(i);
-			for(int j = 0; j < mt.extensions.size(); ++j)
-				if(mt.extensions.get(j).toLowerCase().equals(ext) )
+			for(int j = 0; j < mt.getExtensions().size(); ++j)
+				if(mt.getExtensions().get(j).toLowerCase().equals(ext) )
 					return mt;
 		}
 		

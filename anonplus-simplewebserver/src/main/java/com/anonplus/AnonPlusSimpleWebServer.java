@@ -1,9 +1,5 @@
 package com.anonplus;
 import java.io.IOException;
-
-
-
-
 import static java.io.File.*;
 import static java.util.Arrays.*;
 
@@ -45,10 +41,11 @@ public class AnonPlusSimpleWebServer  {
 			config.readConfigurationFile(configFile);
 			Global.message("--------------------------------------------------");
 			Global.message("Server config: ");
-			Global.message("DirectoryIndex: " + config.DirectoryIndex ) ;
-			Global.message("Port: " + config.Port) ;
-			Global.message("DocumentRoot: " + config.DocumentRoot);
-			new Server(config);
+			Global.message("DirectoryIndex: " + config.getDirectoryIndex()) ;
+			Global.message("Port: " + config.getPort()) ;
+			Global.message("DocumentRoot: " + config.getDocumentRoot());
+			Server server = new Server(config);
+			server.startServer();
 			
 		} catch (Exception e2) {
 			Global.message("error:" + e2.getMessage());

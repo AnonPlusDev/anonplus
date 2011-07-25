@@ -3,7 +3,7 @@ package com.anonplus;
 import java.net.*;
 import java.io.*;
 
-public class Server extends Thread {
+public class Server {
 	public enum METHOD {
 		NOT_SUPPORTED, GET, HEAD
 	};
@@ -16,22 +16,21 @@ public class Server extends Thread {
 	}
 
 	public Server(SimpleWebServerConfig _config) {
-		config = _config;		
-		this.startServer();
+		config = _config;
 	}
 
-	private void startServer() {
+	public void startServer() {
 		message("Starting server...");
 		ServerSocket socket = null;
 		try {
 
-			socket = new ServerSocket(config.Port);
+			socket = new ServerSocket(config.getPort());
 		} catch (Exception e) {
-			message("Binding to port " + Integer.toString(config.Port) + ": Failed!\n");
+			message("Binding to port " + Integer.toString(config.getPort()) + ": Failed!\n");
 			message("\n" + "Fatal Error:" + e.getMessage());
 			return;
 		}
-		message("Binding to port " + Integer.toString(config.Port) + ": OK!\n");
+		message("Binding to port " + Integer.toString(config.getPort()) + ": OK!\n");
 
 		while (true) {
 			message("Waiting for requests!\n");
@@ -70,9 +69,9 @@ public class Server extends Thread {
 			String tmp = input.readLine();
 			String tmp2 = new String(tmp);
 			tmp.toUpperCase();
-			if (tmp.startsWith("GET")) {
+			if (tmp.startsWith(Constants.HTTP_GET_METHOD)) {
 				method = METHOD.GET;
-			} else if (tmp.startsWith("HEAD")) {
+			} else if (tmp.startsWith(Constants.HTTP_HEAD_METHOD)) {
 				method = METHOD.HEAD;
 			} else {
 				method = METHOD.NOT_SUPPORTED;
@@ -80,7 +79,7 @@ public class Server extends Thread {
 
 			if (method == METHOD.NOT_SUPPORTED) {
 				try {
-					output.writeBytes(construct_http_header(501, "text/html"));
+					output.writeBytes(construct_http_header(501, Constants.HTML_CONTENT_TYPE));
 					output.close();
 					return;
 				} catch (Exception e1) {
@@ -112,16 +111,16 @@ public class Server extends Thread {
 		// path do now have the filename to what to the file it wants to open
 		message("\nClient requested:" + new File(path).getAbsolutePath() + "\n");
 		FileInputStream requestedfile = null;
-		String fullPath = config.DocumentRoot + "/" + path;
+		String fullPath = config.getDocumentRoot() + "/" + path;
 		File f = new File(fullPath);
 		
 		// Checks if the full path is a directory. If it is then 
 		// searches directoryIndex files
 		if(f.isDirectory())
 		{
-			for(int i = 0; i < config.DirectoryIndex.size(); ++i)
+			for(int i = 0; i < config.getDirectoryIndex().size(); ++i)
 			{
-				File file2 = new File(fullPath + "/" + config.DirectoryIndex.get(i));
+				File file2 = new File(fullPath + "/" + config.getDirectoryIndex().get(i));
 				if(file2.exists() && file2.isFile() && file2.canRead())
 				{
 					fullPath = file2.getAbsolutePath();
@@ -135,7 +134,7 @@ public class Server extends Thread {
 		} catch (Exception e) {
 			try {
 				// if you could not open the file send a 404
-				output.writeBytes(construct_http_header(404, "text/html"));
+				output.writeBytes(construct_http_header(404, Constants.HTML_CONTENT_TYPE));
 				// close the stream
 				output.close();
 			} catch (Exception e2) {
@@ -154,11 +153,11 @@ public class Server extends Thread {
 			if(tmpList.length > 1 ) { 
 				ext = tmpList[tmpList.length - 1];
 				Global.message(ext);
-				contentType = config.MimeTypes.findByExtension(ext).contentType;
+				contentType = config.getMimeTypes().findByExtension(ext).getContentType();
 				Global.message(contentType);
 			}
 			if(contentType == null)
-				contentType = new String("text/html");		
+				contentType = new String(Constants.HTML_CONTENT_TYPE);		
 			
 			output.writeBytes(construct_http_header(200, contentType));
 
@@ -184,36 +183,41 @@ public class Server extends Thread {
 	}
 
 	private String construct_http_header(int return_code, String _contentType) {
-		String s = "HTTP/1.0 ";
+		StringBuilder builder = new StringBuilder(Constants.HTTP_VERSION);
 		// TODO : Serve Error Pages
 		switch (return_code) {
 		case 200:
-			s = s + "200 OK";
+			builder.append(Constants.HTTP_OK);
 			break;
 		case 400:
-			s = s + "400 Bad Request";
+			builder.append(Constants.HTTP_BAD_REQ);
 			break;
 		case 403:
-			s = s + "403 Forbidden";
+			builder.append(Constants.HTTP_FORBIDDEN);
 			break;
 		case 404:
-			s = s + "404 Not Found";
+			builder.append(Constants.HTTP_URL_NOT_FOUND);
 			break;
 		case 500:
-			s = s + "500 Internal Server Error";
+			builder.append(Constants.HTTP_INTERNAL_SERVER_ERROR);
 			break;
 		case 501:
-			s = s + "501 Not Implemented";
+			builder.append(Constants.HTTP_NOT_IMPLEMENTED);
 			break;
 		}
-		s = s + "\r\n"; // other header fields,
-		s = s + "Connection: close\r\n"; // only closed
-		s = s + "Server: AnonplusSimpleWebServer v0.1\r\n"; // server name		
-		s = s + "Content-Type: " + _contentType + "\r\n";
-		s = s + "\r\n"; // end of the httpheader
+		builder.append(Constants.NEWLINE_SEPARATOR); // other header fields,
+		builder.append("Connection: close"); // only closed
+		builder.append(Constants.NEWLINE_SEPARATOR); 
+		builder.append("Server: AnonplusSimpleWebServer v0.1");// server name
+		builder.append(Constants.NEWLINE_SEPARATOR);  		
+		builder.append("Content-Type: ");
+		builder.append(_contentType);
+		builder.append(Constants.NEWLINE_SEPARATOR);
+		builder.append(Constants.NEWLINE_SEPARATOR); // end of the httpheader
 
-		Global.message(s);
-		return s;
+		String httpHeaders = builder.toString();
+		Global.message(httpHeaders);
+		return httpHeaders;
 	}
 	
 	private void outputErrorPage(int _error_code, String _contentType, DataOutputStream _output)
@@ -245,6 +249,5 @@ public class Server extends Thread {
 		s = s + "Server: AnonplusSimpleWebServer v0.1\r\n"; // server name		
 		s = s + "Content-Type: " + _contentType + "\r\n";
 		s = s + "\r\n"; // end of the httpheader
-
 	}
 }
