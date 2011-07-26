@@ -1,7 +1,4 @@
 package com.anonplus;
-import java.io.IOException;
-import static java.io.File.*;
-import static java.util.Arrays.*;
 
 /**
  * Anonplus-simplewebserver 
@@ -10,7 +7,7 @@ import static java.util.Arrays.*;
 
 import org.apache.commons.cli.*;
 
-import com.sun.security.auth.login.ConfigFile;
+
 
 
 public class AnonPlusSimpleWebServer  {
@@ -48,7 +45,7 @@ public class AnonPlusSimpleWebServer  {
 			
 		} catch (Exception e2) {
 			Global.message("error:" + e2.getMessage());
-			e2.printStackTrace();
+			//e2.printStackTrace();
 		};
 	    
 	}

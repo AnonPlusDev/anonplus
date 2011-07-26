@@ -2,7 +2,6 @@ package com.anonplus;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,7 +39,7 @@ public class SimpleWebServerConfig {
 		
 		port = Integer.parseInt(p.getProperty("Port", "8080"));
 		documentRoot = p.getProperty("DocumentRoot", "./public_html");
-		documentRoot = new File(documentRoot).getAbsolutePath();		
+		documentRoot = new File(documentRoot).getAbsolutePath();
 		Global.message(" ++++++++ " + documentRoot );
 		String tmpList[] = p.getProperty("DirectoryIndex", "index.html default.html").split(" ");
 		this.DirectoryIndex = new ArrayList<String>();

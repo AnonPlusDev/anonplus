@@ -1,15 +1,25 @@
 package com.anonplus;
 
-import java.net.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 
-public class Server {
+
+public class Server implements Runnable {
 	public enum METHOD {
 		NOT_SUPPORTED, GET, HEAD
 	};
 
 
-	private SimpleWebServerConfig config = null;
+	private SimpleWebServerConfig config;
+	private ServerSocket socket;
+	private Socket clientSocket;
 
 	private void message(String m) {
 		System.out.println(m);
@@ -18,12 +28,35 @@ public class Server {
 	public Server(SimpleWebServerConfig _config) {
 		config = _config;
 	}
+	
+	public void run() {
+		listenClientRequest();
+	}
+	
+	public void listenClientRequest() {		
+		message("Waiting for requests!\n");
+		try {				
+			InetAddress client = clientSocket.getInetAddress();
+
+			message(client.getHostName() + " connected to server with the Thread ID:" + Thread.currentThread().getId() + Constants.NEWLINE_SEPARATOR);
+
+			BufferedReader input = new BufferedReader(
+					new InputStreamReader(clientSocket.getInputStream()));
+
+			DataOutputStream output = new DataOutputStream(clientSocket
+					.getOutputStream());
+			message("Got request!\n");
+			handle_request(input, output);
+
+		} catch (Exception e) {
+			message("\nError:" + e.getMessage());
+			message("Caused by:" + e.getCause().getClass().getName());
+		}		
+	}	
 
 	public void startServer() {
 		message("Starting server...");
-		ServerSocket socket = null;
 		try {
-
 			socket = new ServerSocket(config.getPort());
 		} catch (Exception e) {
 			message("Binding to port " + Integer.toString(config.getPort()) + ": Failed!\n");
@@ -31,28 +64,15 @@ public class Server {
 			return;
 		}
 		message("Binding to port " + Integer.toString(config.getPort()) + ": OK!\n");
-
 		while (true) {
-			message("Waiting for requests!\n");
 			try {
-				Socket connSocket = socket.accept();
-				InetAddress client = connSocket.getInetAddress();
-
-				message(client.getHostName() + " connected to server.\n");
-
-				BufferedReader input = new BufferedReader(
-						new InputStreamReader(connSocket.getInputStream()));
-
-				DataOutputStream output = new DataOutputStream(connSocket
-						.getOutputStream());
-				message("Got request!\n");
-				handle_request(input, output);
-
-			} catch (Exception e) {
-				message("\nError:" + e.getMessage());
-			}
+				clientSocket = socket.accept();
+				new Thread(this).start();
+			} catch (IOException exception) {
+				message(Constants.NEWLINE_SEPARATOR + "Error accepting client requests:" + exception.getMessage());
+				return;
+			}			
 		}
-
 	}
 
 	private void handle_request(BufferedReader input, DataOutputStream output) {
