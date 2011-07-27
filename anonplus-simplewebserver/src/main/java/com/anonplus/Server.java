@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URLDecoder;
 
 
 public class Server implements Runnable {
@@ -33,7 +34,7 @@ public class Server implements Runnable {
 		listenClientRequest();
 	}
 	
-	public void listenClientRequest() {		
+	private void listenClientRequest() {		
 		message("Waiting for requests!\n");
 		try {				
 			InetAddress client = clientSocket.getInetAddress();
@@ -88,7 +89,7 @@ public class Server implements Runnable {
 		try {
 			String tmp = input.readLine();
 			String tmp2 = new String(tmp);
-			tmp.toUpperCase();
+			tmp = tmp.toUpperCase();
 			if (tmp.startsWith(Constants.HTTP_GET_METHOD)) {
 				method = METHOD.GET;
 			} else if (tmp.startsWith(Constants.HTTP_HEAD_METHOD)) {
@@ -119,6 +120,7 @@ public class Server implements Runnable {
 				}
 			}
 			path = tmp2.substring(start + 2, end); // fill in the path
+			
 			// if(path == "") {
 			// path = (cFile.directoryIndex);
 			// TODO: make the search for directory Index
@@ -129,9 +131,9 @@ public class Server implements Runnable {
 		}
 
 		// path do now have the filename to what to the file it wants to open
-		message("\nClient requested:" + new File(path).getAbsolutePath() + "\n");
+		message(Constants.NEWLINE_SEPARATOR + "Client requested:" + new File(config.getDocumentRoot() + File.separator + path).getAbsolutePath() + Constants.NEWLINE_SEPARATOR);
 		FileInputStream requestedfile = null;
-		String fullPath = config.getDocumentRoot() + "/" + path;
+		String fullPath = config.getDocumentRoot() + File.separator + path;
 		File f = new File(fullPath);
 		
 		// Checks if the full path is a directory. If it is then 
@@ -149,7 +151,17 @@ public class Server implements Runnable {
 			}
 		}
 		try {
-			// TODO: Prevent Directory Transversal			
+			/**
+			 * Trying to prevent Directory Transversal.
+			 */
+			if (!isQueryStringSafe(path, config.getDocumentRoot())) {
+				Global.message("Request query string NOT SAFE!");
+				// Sending a 404 page
+				output.writeBytes(construct_http_header(404, Constants.HTML_CONTENT_TYPE));
+				// close the stream
+				output.close();
+			}
+						
 			requestedfile = new FileInputStream(fullPath);
 		} catch (Exception e) {
 			try {
@@ -168,21 +180,22 @@ public class Server implements Runnable {
 			// CHECK EXTENSION
 			
 			String tmpList[] = path.split("\\.");
-			Global.message("tmpListLenght : " + tmpList.length);
-			String ext = new String();
+			Global.message("tmpListLength : " + tmpList.length);
+			String ext = null;
 			if(tmpList.length > 1 ) { 
 				ext = tmpList[tmpList.length - 1];
 				Global.message(ext);
 				contentType = config.getMimeTypes().findByExtension(ext).getContentType();
 				Global.message(contentType);
 			}
-			if(contentType == null)
-				contentType = new String(Constants.HTML_CONTENT_TYPE);		
+			if(contentType == null) {
+				contentType = new String(Constants.HTML_CONTENT_TYPE);
+			}
 			
 			output.writeBytes(construct_http_header(200, contentType));
 
 
-			if (method == METHOD.GET) { 
+			if (method == METHOD.GET) {
 				while (true) {
 
 					int b = requestedfile.read();
@@ -200,6 +213,39 @@ public class Server implements Runnable {
 		catch (Exception e) {
 		}
 
+	}
+	
+	private boolean isQueryStringSafe (String path, String documentRoot) throws IOException {
+		
+		Global.message("Query String : " + path);
+		
+		/**
+		 * Decoding the query string just in case, the client is encoding 
+		 * the special characters.
+		 */		
+		path = URLDecoder.decode(path, Constants.URL_DECODE_CHARSET);
+		
+		/**
+		 * Check to determine if user is trying to traverse through
+		 * directories using the characters .. or ../ or ..\ in the URL. If so,
+		 * throw error.
+		 */
+		if (path.matches("^.*[\\.]{2}[/\\\\]?.*$")) {
+			return false; 
+		}
+		
+		File docRoot = new File(documentRoot);
+		File userFile = new File(documentRoot + File.pathSeparator + path);
+		
+		/**
+		 * Check to determine if the user is not traversing out of the document
+		 * root.
+		 */
+		if (userFile.getCanonicalPath().startsWith(docRoot.getCanonicalPath())) { 
+			return true; 
+		}
+		
+		return false;				
 	}
 
 	private String construct_http_header(int return_code, String _contentType) {
@@ -234,7 +280,7 @@ public class Server implements Runnable {
 		builder.append(_contentType);
 		builder.append(Constants.NEWLINE_SEPARATOR);
 		builder.append(Constants.NEWLINE_SEPARATOR); // end of the httpheader
-
+		builder.append("Page rendered!");
 		String httpHeaders = builder.toString();
 		Global.message(httpHeaders);
 		return httpHeaders;
