@@ -26,13 +26,14 @@ public class SimpleWebServerConfig {
 	private String error501page;
 	private String mimeFile;
 	private MimeTypeList mimeTypes;
+	private String log4jConfigFileLocation;
 	
 	public void readConfigurationFile(String filename) throws IOException {
 		InputStream configFileStream = SimpleWebServerConfig.class.getResourceAsStream("/resources/" + filename);
 		if(configFileStream == null) {
 			throw new IOException("Path: " + filename + " does not exist, is a directory or it's not readable!\n");
 		}
-		Global.message("Reading " + filename + " !\n");
+		Global.logInfoMessage("Reading " + filename + " !\n");
 		 
 		Properties p = new Properties();
 		p.load(configFileStream);
@@ -40,7 +41,7 @@ public class SimpleWebServerConfig {
 		port = Integer.parseInt(p.getProperty("Port", "8080"));
 		documentRoot = p.getProperty("DocumentRoot", "./public_html");
 		documentRoot = new File(documentRoot).getAbsolutePath();
-		Global.message(" ++++++++ " + documentRoot );
+		Global.logInfoMessage(" ++++++++ " + documentRoot );
 		String tmpList[] = p.getProperty("DirectoryIndex", "index.html default.html").split(" ");
 		this.DirectoryIndex = new ArrayList<String>();
 		for(int i=0; i < tmpList.length; ++i) {
@@ -50,11 +51,12 @@ public class SimpleWebServerConfig {
 		}
 		mimeFile = p.getProperty("MimeFile", "mime.types");
 		//mimeFile = new File(mimeFile).getAbsolutePath();	
-		Global.message(" ++++++++ " + mimeFile );
+		Global.logInfoMessage(" ++++++++ " + mimeFile );
 		
 		documentRoot = p.getProperty("DocumentRoot", "public_html");
-		if(Global.DEBUG) p.list(System.out);		
+		if(Global.DEBUG) p.list(System.out);
 		readMimeFile();
+		setLog4jConfigFileLocation(p.getProperty("log4j-config", "log4j.properties"));
 		
 	}
 	
@@ -70,10 +72,10 @@ public class SimpleWebServerConfig {
 		BufferedReader br = new BufferedReader(reader);
 		String bufferLine;
 		Pattern p = Pattern.compile("#.*$");
-		Global.message("-------------------------------------");
-		Global.message("-------------------------------------");
-		Global.message("-------------------------------------");
-		Global.message("           REGEX                     ");
+		Global.logInfoMessage("-------------------------------------");
+		Global.logInfoMessage("-------------------------------------");
+		Global.logInfoMessage("-------------------------------------");
+		Global.logInfoMessage("               REGEX                 ");
 		
 		mimeTypes = new MimeTypeList(); 
 		do 
@@ -97,8 +99,8 @@ public class SimpleWebServerConfig {
 					mimeType.getExtensions().add(sList[i]);				
 			}
 			mimeTypes.list.add(mimeType);
-			Global.message("Adding Mime: contentType ->  " + mimeType.getContentType());
-			Global.message("Adding Mime: extensions ->  " + mimeType.getExtensions().toString() );
+			Global.logInfoMessage("Adding Mime: contentType ->  " + mimeType.getContentType());
+			Global.logInfoMessage("Adding Mime: extensions ->  " + mimeType.getExtensions().toString() );
 				
 		} while(bufferLine != null);		
 	}
@@ -256,4 +258,19 @@ public class SimpleWebServerConfig {
 	public void setMimeTypes(MimeTypeList mimeTypes) {
 		this.mimeTypes = mimeTypes;
 	}
+	
+	/**
+	 * @return the log4jConfigFileLocation
+	 */
+	public String getLog4jConfigFileLocation() {
+		return log4jConfigFileLocation;
+	}
+
+	/**
+	 * @param log4jConfigFileLocation the log4jConfigFileLocation to set
+	 */
+	public void setLog4jConfigFileLocation(String log4jConfigFileLocation) {
+		this.log4jConfigFileLocation = log4jConfigFileLocation;
+	}
+
 }

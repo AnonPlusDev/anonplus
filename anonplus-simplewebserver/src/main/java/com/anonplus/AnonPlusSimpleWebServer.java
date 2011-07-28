@@ -5,10 +5,13 @@ package com.anonplus;
  *
  */
 
-import org.apache.commons.cli.*;
-
-
-
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.log4j.PropertyConfigurator;
 
 public class AnonPlusSimpleWebServer  {
 	private static Options options = null; // Command line options	
@@ -35,11 +38,12 @@ public class AnonPlusSimpleWebServer  {
 		try {
 			
 			config.readConfigurationFile(configFile);
-			Global.message("--------------------------------------------------");
-			Global.message("Server config: ");
-			Global.message("DirectoryIndex: " + config.getDirectoryIndex()) ;
-			Global.message("Port: " + config.getPort()) ;
-			Global.message("DocumentRoot: " + config.getDocumentRoot());
+			Global.logInfoMessage("--------------------------------------------------");
+			Global.logInfoMessage("Server config: ");
+			Global.logInfoMessage("DirectoryIndex: " + config.getDirectoryIndex()) ;
+			Global.logInfoMessage("Port: " + config.getPort()) ;
+			Global.logInfoMessage("DocumentRoot: " + config.getDocumentRoot());
+			PropertyConfigurator.configure(config.getLog4jConfigFileLocation()); // Init log4j configuration.
 			Server server = new Server(config);
 			server.startServer();
 			
@@ -51,10 +55,8 @@ public class AnonPlusSimpleWebServer  {
 	}
 	
 	
-	private static void help(String pName)
-	{
-		Global.message(pName + " Version - 0.1");
-		
+	private static void help(String pName) {
+		Global.message(pName + " Version - 0.1");		
 	}
 	
 	private void loadArgs(String[] args){

@@ -11,20 +11,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URLDecoder;
 
-
 public class Server implements Runnable {
 	public enum METHOD {
 		NOT_SUPPORTED, GET, HEAD
 	};
 
-
 	private SimpleWebServerConfig config;
 	private ServerSocket socket;
 	private Socket clientSocket;
-
-	private void message(String m) {
-		System.out.println(m);
-	}
 
 	public Server(SimpleWebServerConfig _config) {
 		config = _config;
@@ -35,42 +29,41 @@ public class Server implements Runnable {
 	}
 	
 	private void listenClientRequest() {		
-		message("Waiting for requests!\n");
+		Global.logDebugMessage("Waiting for requests!\n");
 		try {				
 			InetAddress client = clientSocket.getInetAddress();
 
-			message(client.getHostName() + " connected to server with the Thread ID:" + Thread.currentThread().getId() + Constants.NEWLINE_SEPARATOR);
+			Global.logInfoMessage(client.getHostName() + " connected to server with the Thread ID:" + Thread.currentThread().getId() + Constants.NEWLINE_SEPARATOR);
 
 			BufferedReader input = new BufferedReader(
 					new InputStreamReader(clientSocket.getInputStream()));
 
 			DataOutputStream output = new DataOutputStream(clientSocket
 					.getOutputStream());
-			message("Got request!\n");
 			handle_request(input, output);
 
 		} catch (Exception e) {
-			message("\nError:" + e.getMessage());
-			message("Caused by:" + e.getCause().getClass().getName());
+			Global.logErrorMessage("\nError:" + e.getMessage());
+			Global.logErrorMessage("Caused by:" + e.getCause().getClass().getName());
 		}		
 	}	
 
 	public void startServer() {
-		message("Starting server...");
+		Global.logInfoMessage("Starting server...");
 		try {
 			socket = new ServerSocket(config.getPort());
 		} catch (Exception e) {
-			message("Binding to port " + Integer.toString(config.getPort()) + ": Failed!\n");
-			message("\n" + "Fatal Error:" + e.getMessage());
+			Global.logInfoMessage("Binding to port " + Integer.toString(config.getPort()) + ": Failed!\n");
+			Global.logInfoMessage("\n" + "Fatal Error:" + e.getMessage());
 			return;
 		}
-		message("Binding to port " + Integer.toString(config.getPort()) + ": OK!\n");
+		Global.logErrorMessage("Binding to port " + Integer.toString(config.getPort()) + ": OK!\n");
 		while (true) {
 			try {
 				clientSocket = socket.accept();
 				new Thread(this).start();
 			} catch (IOException exception) {
-				message(Constants.NEWLINE_SEPARATOR + "Error accepting client requests:" + exception.getMessage());
+				Global.logErrorMessage(Constants.NEWLINE_SEPARATOR + "Error accepting client requests:" + exception.getMessage());
 				return;
 			}			
 		}
@@ -104,7 +97,7 @@ public class Server implements Runnable {
 					output.close();
 					return;
 				} catch (Exception e1) {
-					message("error:" + e1.getMessage());
+					Global.logErrorMessage("error:" + e1.getMessage());
 				}
 			}
 
@@ -127,11 +120,11 @@ public class Server implements Runnable {
 			// }
 
 		} catch (Exception e2) {
-			message("error:" + e2.getMessage());
+			Global.logErrorMessage("error:" + e2.getMessage());
 		}
 
 		// path do now have the filename to what to the file it wants to open
-		message(Constants.NEWLINE_SEPARATOR + "Client requested:" + new File(config.getDocumentRoot() + File.separator + path).getAbsolutePath() + Constants.NEWLINE_SEPARATOR);
+		Global.logInfoMessage(Constants.NEWLINE_SEPARATOR + "Client requested:" + new File(config.getDocumentRoot() + File.separator + path).getAbsolutePath() + Constants.NEWLINE_SEPARATOR);
 		FileInputStream requestedfile = null;
 		String fullPath = config.getDocumentRoot() + File.separator + path;
 		File f = new File(fullPath);
@@ -155,7 +148,7 @@ public class Server implements Runnable {
 			 * Trying to prevent Directory Transversal.
 			 */
 			if (!isQueryStringSafe(path, config.getDocumentRoot())) {
-				Global.message("Request query string NOT SAFE!");
+				Global.logWarnMessage("Request query string NOT SAFE!");
 				// Sending a 404 page
 				output.writeBytes(construct_http_header(404, Constants.HTML_CONTENT_TYPE));
 				// close the stream
@@ -170,7 +163,7 @@ public class Server implements Runnable {
 				// close the stream
 				output.close();
 			} catch (Exception e2) {
-				message("error" + e.getMessage());	
+				Global.logErrorMessage("error" + e.getMessage());	
 			}
 			
 		} 
@@ -180,13 +173,13 @@ public class Server implements Runnable {
 			// CHECK EXTENSION
 			
 			String tmpList[] = path.split("\\.");
-			Global.message("tmpListLength : " + tmpList.length);
+			Global.logDebugMessage("tmpListLength : " + tmpList.length);
 			String ext = null;
 			if(tmpList.length > 1 ) { 
 				ext = tmpList[tmpList.length - 1];
-				Global.message(ext);
+				Global.logDebugMessage(ext);
 				contentType = config.getMimeTypes().findByExtension(ext).getContentType();
-				Global.message(contentType);
+				Global.logInfoMessage(contentType);
 			}
 			if(contentType == null) {
 				contentType = new String(Constants.HTML_CONTENT_TYPE);
@@ -217,7 +210,7 @@ public class Server implements Runnable {
 	
 	private boolean isQueryStringSafe (String path, String documentRoot) throws IOException {
 		
-		Global.message("Query String : " + path);
+		Global.logInfoMessage("Query String : " + path);
 		
 		/**
 		 * Decoding the query string just in case, the client is encoding 
@@ -282,7 +275,7 @@ public class Server implements Runnable {
 		builder.append(Constants.NEWLINE_SEPARATOR); // end of the httpheader
 		builder.append("Page rendered!");
 		String httpHeaders = builder.toString();
-		Global.message(httpHeaders);
+		Global.logDebugMessage(httpHeaders);
 		return httpHeaders;
 	}
 	
