@@ -11,7 +11,9 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.helpers.Loader;
 
 public class AnonPlusSimpleWebServer  {
 	private static Options options = null; // Command line options	
@@ -38,20 +40,20 @@ public class AnonPlusSimpleWebServer  {
 		try {
 			
 			config.readConfigurationFile(configFile);
+			PropertyConfigurator.configure(config.getLog4jConfigFileLocation()); // Init log4j configuration.
 			Global.logInfoMessage("--------------------------------------------------");
 			Global.logInfoMessage("Server config: ");
 			Global.logInfoMessage("DirectoryIndex: " + config.getDirectoryIndex()) ;
 			Global.logInfoMessage("Port: " + config.getPort()) ;
 			Global.logInfoMessage("DocumentRoot: " + config.getDocumentRoot());
-			PropertyConfigurator.configure(config.getLog4jConfigFileLocation()); // Init log4j configuration.
+			
 			Server server = new Server(config);
 			server.startServer();
 			
 		} catch (Exception e2) {
 			Global.message("error:" + e2.getMessage());
 			//e2.printStackTrace();
-		};
-	    
+		};	    
 	}
 	
 	
