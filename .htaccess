@@ -1,5 +1,4 @@
 RewriteEngine on
-RewriteEngine on
 RewriteCond %{HTTP_HOST} ^anonplus.net$ [OR]
 RewriteCond %{HTTP_HOST} ^www.anonplus.net$
 RewriteRule ^/?$ "http\:\/\/anonplus\.bombshellz\.net\"
